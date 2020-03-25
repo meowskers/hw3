@@ -28,6 +28,18 @@ void print_board(char ** board){
         printf("\n");
     }
 }
+char ** copy_board(char ** board){
+    char ** board_copy = (char **)calloc(m*n, sizeof(char *)); 
+    for(int i=0; i< m; i++){
+        board_copy[i] = (char *)calloc(n, sizeof(char));
+    }
+    for(int i = 0; i < m; i++){
+        for(int j = 0; j < n; j++){
+            board_copy[i][j] = board[i][j];
+        }
+    }
+    return board_copy;
+}
 int complete_board(char ** board){
     for(int i = 0; i < m; i++){
         for(int j = 0; j < n; j++){
@@ -65,33 +77,61 @@ void* sonnys_place(int c, int r, int move, char ** board){
     int total_moves = 0;
     int * valid_moves = find_moves(c,r,board);
     for(int i =0; i < 8; i++){
-        //printf("%d ",*(valid_moves+i));
         //SPIN OFF NEW THREADS CALL RECURSIVLY
         if(*(valid_moves+i)!=-1){
             total_moves++;
         }
     }
+    //printf("TOTAL_MOVES %d\n",total_moves);
     if(total_moves == 0){
         if(complete_board(board)){
             max_squares = m*n;
             printf("THREAD %ld: Sonny found a full knight's tour!\n",(long)pthread_self());
+            free_board(board);
         }else{
-        //found of a dead end
-            
+            printf("THREAD %ld: Dead end after move #%d\n",(long)pthread_self(),move);
+            if(max_squares<move){
+                max_squares=move;
+            }
+            print_board(board);
+            //dead end boards should be freed at the end!!!
+            free_board(board);
         }
     }else if(total_moves == 1){
-        //found only 1 move
+        for(int i = 0; i < 8; i++){
+            if(*(valid_moves+i)!=-1){
+                board[c+sequence[i][0]][r+sequence[i][1]] = 'S';
+                sonnys_place(c+sequence[i][0], r+sequence[i][1], move+1, board);
+            }
+        }
         
     }else{
-        //found more than 1 move
+        int place_holder = total_moves;
+        for(int i = 0; i < 8; i++){
+            if(*(valid_moves+i)!=-1){
+                if(place_holder==1){
+                    board[c+sequence[i][0]][r+sequence[i][1]] = 'S';
+                    sonnys_place(c+sequence[i][0], r+sequence[i][1], move+1, board);
+                }else{
+                    char ** board_copy = copy_board(board);
+                    board_copy[c+sequence[i][0]][r+sequence[i][1]] = 'S';
+                    sonnys_place(c+sequence[i][0], r+sequence[i][1], move+1, board_copy);
+                }
+            }
+        }
+        
         
     }
-    printf("THREAD %ld: %d moves possible after move #%d; creating threads...\n",(long)pthread_self(),total_moves,move);
+    
     free(valid_moves);
     return NULL; 
 } 
 int main(int argc, char** argv){
     setvbuf(stdout,NULL,_IONBF,0);
+    #ifdef NO_PARALLEL
+    printf("YOOOOOOO\n");
+    #endif
+    
     if((argc != 3) && (argc != 4)){
         fprintf(stderr,"ERROR: Invalid arguments(s)\n");
         fprintf(stderr,"USAGE: a.out <m> <n> [<x>]\n");
@@ -143,9 +183,9 @@ int main(int argc, char** argv){
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     sonnys_place(0, 0, 1, blank_board);
-    print_board(blank_board);
+    //print_board(blank_board);
     free_board(blank_board);
-    
+    printf("THREAD %ld: Best solution(s) found visit %d squares (out of %d)\n",(long)pthread_self(),max_squares,m*n);
     
     pthread_t thread; // declare thread 
     //pthread_create(&thread, NULL, calls, NULL); 
