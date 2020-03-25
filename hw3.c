@@ -74,7 +74,7 @@ void* sonnys_place(int c, int r, int move, char ** board){
     if(total_moves == 0){
         if(complete_board(board)){
             max_squares = m*n;
-            printf("THREAD %ld: Sonny found a full knight's tour!\n");
+            printf("THREAD %ld: Sonny found a full knight's tour!\n",(long)pthread_self());
         }else{
         //found of a dead end
             
