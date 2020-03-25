@@ -28,6 +28,16 @@ void print_board(char ** board){
         printf("\n");
     }
 }
+int complete_board(char ** board){
+    for(int i = 0; i < m; i++){
+        for(int j = 0; j < n; j++){
+            if(board[i][j]=='.'){
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
 int *find_moves(int c, int r, char ** board){
     int valid_moves[8] = {0,1,2,3,4,5,6,7};
     int * vm = (int *)calloc(8,sizeof(int));
@@ -43,7 +53,7 @@ int *find_moves(int c, int r, char ** board){
         }else{
             if(board[nc][nr]=='.'){
                 //*(vm+i) = i;
-                printf("%d,%d made it through\n",nc,nr);
+                //printf("%d,%d made it through\n",nc,nr);
             }else{
                 *(vm + i) = -1;
             }
@@ -52,11 +62,31 @@ int *find_moves(int c, int r, char ** board){
     return vm;
 }
 void* sonnys_place(int c, int r, int move, char ** board){ 
-    
+    int total_moves = 0;
     int * valid_moves = find_moves(c,r,board);
     for(int i =0; i < 8; i++){
-        printf("%d ",*(valid_moves+i));
+        //printf("%d ",*(valid_moves+i));
+        //SPIN OFF NEW THREADS CALL RECURSIVLY
+        if(*(valid_moves+i)!=-1){
+            total_moves++;
+        }
     }
+    if(total_moves == 0){
+        if(complete_board(board)){
+            max_squares = m*n;
+            printf("THREAD %ld: Sonny found a full knight's tour!\n");
+        }else{
+        //found of a dead end
+            
+        }
+    }else if(total_moves == 1){
+        //found only 1 move
+        
+    }else{
+        //found more than 1 move
+        
+    }
+    printf("THREAD %ld: %d moves possible after move #%d; creating threads...\n",(long)pthread_self(),total_moves,move);
     free(valid_moves);
     return NULL; 
 } 
@@ -97,11 +127,12 @@ int main(int argc, char** argv){
     }
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     printf("THREAD %ld: Solving Sonny's knight's tour problem for a %dx%d board\n",(long) pthread_self(),m,n);
-    printf("arg1: %d, arg2: %d, arg3: %d\n",m,n,x); 
+    //printf("arg1: %d, arg2: %d, arg3: %d\n",m,n,x); 
     // MAKING A BLANK BOARD
-    char ** blank_board = (char **)calloc(m*n,sizeof(char *)); 
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    char ** blank_board = (char **)calloc(m*n, sizeof(char *)); 
     for(int i=0; i< m; i++){
-        blank_board[i] = (char *)malloc(n * sizeof(char));
+        blank_board[i] = (char *)calloc(n, sizeof(char));
     }
     for(int i = 0; i < m; i++){
         for(int j = 0; j < n; j++){
@@ -109,8 +140,10 @@ int main(int argc, char** argv){
         }
     }
     blank_board[0][0] = 'S';
-    print_board(blank_board);
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
     sonnys_place(0, 0, 1, blank_board);
+    print_board(blank_board);
     free_board(blank_board);
     
     
