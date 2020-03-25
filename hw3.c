@@ -8,18 +8,56 @@ int n;
 int x;
 int max_squares = 0;
 char *** dead_ends;
+int sequence[8][2]= {-2,-1,-1,-2,1,-2,2,-1,2,1,1,2,-1,2,-2,1};
 void free_board(char ** board){
     for(int i=0; i< m; i++){
         free(board[i]);
     }
     free(board);
 }
-void* sonnys_place(int c, int r, int move, char ** board) 
-{ 
-    c++;
-    // using pthread_self() get current thread id 
-    //printf("In function \nthread id = %d\n", pthread_self()); 
-    //pthread_exit(NULL); 
+void print_board(char ** board){
+    for(int i=0; i < m; i++){
+        if(i == 0){
+            printf("THREAD %ld: >  ",(long) pthread_self());
+        }else{
+            printf("THREAD %ld:    ",(long) pthread_self());
+        }
+        for(int j=0; j < n; j++){
+            printf("%c",board[i][j]);
+        }
+        printf("\n");
+    }
+}
+int *find_moves(int c, int r, char ** board){
+    int valid_moves[8] = {0,1,2,3,4,5,6,7};
+    int * vm = (int *)calloc(8,sizeof(int));
+    for(int i = 0; i < 8; i++){
+        *(vm +i) = i;
+    }
+    for(int i = 0; i < 8; i++){
+        int nc = c+sequence[i][0];
+        int nr = r+sequence[i][1];
+        //printf("CHECKING %d,%d\n",nc,nr);
+        if((nc>m-1)||(nc<0)||(nr>n-1)||(nr<0)){
+            *(vm + i) = -1;
+        }else{
+            if(board[nc][nr]=='.'){
+                //*(vm+i) = i;
+                printf("%d,%d made it through\n",nc,nr);
+            }else{
+                *(vm + i) = -1;
+            }
+        }
+    }
+    return vm;
+}
+void* sonnys_place(int c, int r, int move, char ** board){ 
+    
+    int * valid_moves = find_moves(c,r,board);
+    for(int i =0; i < 8; i++){
+        printf("%d ",*(valid_moves+i));
+    }
+    free(valid_moves);
     return NULL; 
 } 
 int main(int argc, char** argv){
@@ -70,6 +108,8 @@ int main(int argc, char** argv){
             blank_board[i][j] = '.';
         }
     }
+    blank_board[0][0] = 'S';
+    print_board(blank_board);
     sonnys_place(0, 0, 1, blank_board);
     free_board(blank_board);
     
