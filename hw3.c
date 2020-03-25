@@ -8,7 +8,12 @@ int n;
 int x;
 int max_squares = 0;
 char *** dead_ends;
-
+void free_board(char ** board){
+    for(int i=0; i< m; i++){
+        free(board[i]);
+    }
+    free(board);
+}
 void* sonnys_place(int c, int r, int move, char ** board) 
 { 
     c++;
@@ -66,7 +71,7 @@ int main(int argc, char** argv){
         }
     }
     sonnys_place(0, 0, 1, blank_board);
-    free(blank_board);
+    free_board(blank_board);
     
     
     pthread_t thread; // declare thread 
