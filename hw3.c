@@ -95,17 +95,16 @@ void* sonnys_place(int c, int r, int move, char ** board){
             printf("THREAD %ld: Sonny found a full knight's tour!\n",(long)pthread_self());
             free_board(board);
         }else{
-            printf("THREAD %ld: Dead end after move #%d\n",(long)pthread_self(),move);
             if(max_squares<move){
                 max_squares=move;
             }
-            /*
+            
             if(x==-1){
                 add_dead_end(board);
-            }
-            else */if(move>=x){
-                printf("ADDING!!\n");
+            } else if(move>=x) {
                 add_dead_end(board);
+            } else{
+                free(board);
             }
             
             //add_dead_end(board);
