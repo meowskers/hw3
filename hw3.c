@@ -8,12 +8,17 @@ int n;
 int x;
 int max_squares = 0;
 char *** dead_ends;
+int dead_end_size;
+int dead_end_pos;
 int sequence[8][2]= {-2,-1,-1,-2,1,-2,2,-1,2,1,1,2,-1,2,-2,1};
 void free_board(char ** board){
     for(int i=0; i< m; i++){
         free(board[i]);
     }
     free(board);
+}
+void add_dead_end(char ** board){
+    
 }
 void print_board(char ** board){
     for(int i=0; i < m; i++){
@@ -93,7 +98,7 @@ void* sonnys_place(int c, int r, int move, char ** board){
             if(max_squares<move){
                 max_squares=move;
             }
-            print_board(board);
+            add_dead_end(board);
             //dead end boards should be freed at the end!!!
             free_board(board);
         }
