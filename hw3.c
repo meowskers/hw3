@@ -11,6 +11,12 @@ char *** dead_end_boards;
 int dead_end_size = 10;
 int dead_end_pos = 0;
 int sequence[8][2]= {-2,-1,-1,-2,1,-2,2,-1,2,1,1,2,-1,2,-2,1};
+struct thread_params{
+    int c;
+    int r; 
+    int move; 
+    char ** board;
+};
 void free_board(char ** board){
     for(int i=0; i< m; i++){
         free(board[i]);
@@ -94,6 +100,9 @@ void* sonnys_place(int c, int r, int move, char ** board){
             max_squares = m*n;
             printf("THREAD %ld: Sonny found a full knight's tour!\n",(long)pthread_self());
             free_board(board);
+            // **** NEED TO RETURN MOVE **** SOMEHOW
+            // might have to free valid_moves
+            pthread_exit(NULL);
         }else{
             if(max_squares<move){
                 max_squares=move;
@@ -106,8 +115,9 @@ void* sonnys_place(int c, int r, int move, char ** board){
             } else{
                 free_board(board);
             }
-            
-            //add_dead_end(board);
+            pthread_exit(NULL);
+            // **** NEED TO RETURN MOVE **** SOMEHOW
+            // might have to free valid_moves
         }
     }else if(total_moves == 1){
         for(int i = 0; i < 8; i++){
@@ -116,14 +126,24 @@ void* sonnys_place(int c, int r, int move, char ** board){
                 sonnys_place(c+sequence[i][0], r+sequence[i][1], move+1, board);
             }
         }
-        
+    //pthread_create(&thread, NULL, calls, NULL); 
+    //printf("In main \nthread id = %d\n", pthread_self());  
+    //pthread_join(thread, NULL);  
     }else{
         int place_holder = total_moves;
         for(int i = 0; i < 8; i++){
             if(*(valid_moves+i)!=-1){
                 if(place_holder==1){
+                    pthread_t ptid;
+                    struct thread_params *argss;
+                    argss = calloc(1,sizeof(*argss));
+                    argss->c = c+sequence[i][0];
+                    argss->r = r+sequence[i][1];
+                    argss->move = move+1;
+                    argss->board = board;
+                    
                     board[c+sequence[i][0]][r+sequence[i][1]] = 'S';
-                    sonnys_place(c+sequence[i][0], r+sequence[i][1], move+1, board);
+                    pthread_create(&ptid, NULL, sonnys_place, argss);
                 }else{
                     printf("THREAD %ld: %d moves possible after move #%d; creating threads...\n",(long)pthread_self(),total_moves,move);
                     char ** board_copy = copy_board(board);
@@ -205,9 +225,6 @@ int main(int argc, char** argv){
     //pthread_create(&thread, NULL, calls, NULL); 
     //printf("In main \nthread id = %d\n", pthread_self());  
     //pthread_join(thread, NULL);  
-    printf("****** %d ******\n",dead_end_pos);
-    print_board(dead_end_boards[dead_end_pos-1]);
-    printf("**********\n");
     for(int i = dead_end_pos-1; i > -1; i--){
         print_board(dead_end_boards[i]);
         free_board(dead_end_boards[i]);
