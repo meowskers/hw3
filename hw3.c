@@ -99,15 +99,15 @@ void* sonnys_place(int c, int r, int move, char ** board){
             if(max_squares<move){
                 max_squares=move;
             }
-            
+            /*
             if(x==-1){
                 add_dead_end(board);
             }
-            /*else if(move>=x){
+            else */if(move>=x){
                 printf("ADDING!!\n");
                 add_dead_end(board);
             }
-            */
+            
             //add_dead_end(board);
         }
     }else if(total_moves == 1){
