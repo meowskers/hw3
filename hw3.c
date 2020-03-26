@@ -69,12 +69,10 @@ int *find_moves(int c, int r, char ** board){
     for(int i = 0; i < 8; i++){
         int nc = c+sequence[i][0];
         int nr = r+sequence[i][1];
-        //printf("CHECKING %d,%d\n",nc,nr);
         if((nc>m-1)||(nc<0)||(nr>n-1)||(nr<0)){
             *(vm + i) = -1;
         }else{
             if(board[nc][nr]=='.'){
-                //*(vm+i) = i;
                 //printf("%d,%d made it through\n",nc,nr);
             }else{
                 *(vm + i) = -1;
@@ -91,7 +89,6 @@ void* sonnys_place(int c, int r, int move, char ** board){
             total_moves++;
         }
     }
-    //printf("TOTAL_MOVES %d\n",total_moves);
     if(total_moves == 0){
         if(complete_board(board)){
             max_squares = m*n;
@@ -102,13 +99,15 @@ void* sonnys_place(int c, int r, int move, char ** board){
             if(max_squares<move){
                 max_squares=move;
             }
+            /*
             if(x==-1){
                 add_dead_end(board);
             }else if(move>=x){
+                printf("ADDING!!\n");
                 add_dead_end(board);
             }
-            //dead end boards should be freed at the end!!!
-            //free_board(board);
+            */
+            add_dead_end(board);
         }
     }else if(total_moves == 1){
         for(int i = 0; i < 8; i++){
@@ -126,6 +125,7 @@ void* sonnys_place(int c, int r, int move, char ** board){
                     board[c+sequence[i][0]][r+sequence[i][1]] = 'S';
                     sonnys_place(c+sequence[i][0], r+sequence[i][1], move+1, board);
                 }else{
+                    printf("THREAD %ld: %d moves possible after move #%d; creating threads...\n",(long)pthread_self(),total_moves,move);
                     char ** board_copy = copy_board(board);
                     board_copy[c+sequence[i][0]][r+sequence[i][1]] = 'S';
                     sonnys_place(c+sequence[i][0], r+sequence[i][1], move+1, board_copy);
@@ -199,14 +199,16 @@ int main(int argc, char** argv){
     dead_end_boards = (char ***)calloc(m*n*dead_end_size,sizeof(char **));
 
     sonnys_place(0, 0, 1, blank_board);
-    //print_board(blank_board);
     printf("THREAD %ld: Best solution(s) found visit %d squares (out of %d)\n",(long)pthread_self(),max_squares,m*n);
     
     pthread_t thread; // declare thread 
     //pthread_create(&thread, NULL, calls, NULL); 
     //printf("In main \nthread id = %d\n", pthread_self());  
     //pthread_join(thread, NULL);  
-    for(int i = 0; i < dead_end_pos; i++){
+    printf("****** %d ******\n",dead_end_pos);
+    print_board(dead_end_boards[dead_end_pos-1]);
+    printf("**********\n");
+    for(int i = dead_end_pos-1; i > -1; i--){
         print_board(dead_end_boards[i]);
         free_board(dead_end_boards[i]);
     }
