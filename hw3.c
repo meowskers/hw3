@@ -82,7 +82,6 @@ void* sonnys_place(int c, int r, int move, char ** board){
     int total_moves = 0;
     int * valid_moves = find_moves(c,r,board);
     for(int i =0; i < 8; i++){
-        //SPIN OFF NEW THREADS CALL RECURSIVLY
         if(*(valid_moves+i)!=-1){
             total_moves++;
         }
@@ -122,6 +121,7 @@ void* sonnys_place(int c, int r, int move, char ** board){
                     board_copy[c+sequence[i][0]][r+sequence[i][1]] = 'S';
                     sonnys_place(c+sequence[i][0], r+sequence[i][1], move+1, board_copy);
                 }
+                place_holder--;
             }
         }
         
@@ -189,7 +189,7 @@ int main(int argc, char** argv){
     
     sonnys_place(0, 0, 1, blank_board);
     //print_board(blank_board);
-    free_board(blank_board);
+    //free_board(blank_board);
     printf("THREAD %ld: Best solution(s) found visit %d squares (out of %d)\n",(long)pthread_self(),max_squares,m*n);
     
     pthread_t thread; // declare thread 
