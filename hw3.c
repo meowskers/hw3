@@ -104,7 +104,7 @@ void* sonnys_place(int c, int r, int move, char ** board){
             } else if(move>=x) {
                 add_dead_end(board);
             } else{
-                free(board);
+                free_board(board);
             }
             
             //add_dead_end(board);
