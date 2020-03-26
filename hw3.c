@@ -7,9 +7,9 @@ int m;
 int n;
 int x;
 int max_squares = 0;
-char *** dead_ends;
-int dead_end_size;
-int dead_end_pos;
+char *** dead_end_boards;
+int dead_end_size = 10;
+int dead_end_pos = 0;
 int sequence[8][2]= {-2,-1,-1,-2,1,-2,2,-1,2,1,1,2,-1,2,-2,1};
 void free_board(char ** board){
     for(int i=0; i< m; i++){
@@ -18,7 +18,12 @@ void free_board(char ** board){
     free(board);
 }
 void add_dead_end(char ** board){
-    
+    if(dead_end_pos==dead_end_size){
+        dead_end_size = dead_end_size*2;
+        dead_end_boards = (char ***)realloc(dead_end_boards, sizeof(char **)*dead_end_size);
+    }
+    dead_end_boards[dead_end_pos] = board;
+    dead_end_pos = dead_end_pos + 1;
 }
 void print_board(char ** board){
     for(int i=0; i < m; i++){
@@ -97,9 +102,13 @@ void* sonnys_place(int c, int r, int move, char ** board){
             if(max_squares<move){
                 max_squares=move;
             }
-            add_dead_end(board);
+            if(x==-1){
+                add_dead_end(board);
+            }else if(move>=x){
+                add_dead_end(board);
+            }
             //dead end boards should be freed at the end!!!
-            free_board(board);
+            //free_board(board);
         }
     }else if(total_moves == 1){
         for(int i = 0; i < 8; i++){
@@ -186,16 +195,22 @@ int main(int argc, char** argv){
     }
     blank_board[0][0] = 'S';
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
+    dead_end_boards = (char ***)calloc(m*n*dead_end_size,sizeof(char **));
+
     sonnys_place(0, 0, 1, blank_board);
     //print_board(blank_board);
-    //free_board(blank_board);
     printf("THREAD %ld: Best solution(s) found visit %d squares (out of %d)\n",(long)pthread_self(),max_squares,m*n);
     
     pthread_t thread; // declare thread 
     //pthread_create(&thread, NULL, calls, NULL); 
     //printf("In main \nthread id = %d\n", pthread_self());  
     //pthread_join(thread, NULL);  
+    for(int i = 0; i < dead_end_pos; i++){
+        print_board(dead_end_boards[i]);
+        free_board(dead_end_boards[i]);
+    }
+    free(dead_end_boards);
     return 0; 
     
 }
