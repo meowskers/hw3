@@ -149,7 +149,7 @@ void* sonnys_place(void * input){
             } else if(move>=x) {
                 add_dead_end(board);
             } else{
-                //free_board(board);
+                free_board(board);
             }
             //pthread_exit(NULL);
             return NULL;
@@ -167,6 +167,7 @@ void* sonnys_place(void * input){
                 argss->board = board;
                 sonnys_place(argss);
                 in_args->move = argss->move;
+                free(argss);
             }
         }
         return NULL;
@@ -209,6 +210,7 @@ void* sonnys_place(void * input){
             }
         }
         in_args->move = max_move;
+        free(tid);
         /*
         for(int i = 0; i < 8; i++){
             if((*valid_moves+i)!=-1){
