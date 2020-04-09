@@ -298,6 +298,7 @@ int main(int argc, char** argv){
     argss->move = 1;
     argss->board = blank_board;
     sonnys_place(argss);
+    free(argss);
     printf("THREAD %ld: Best solution(s) found visit %d squares (out of %d)\n",(long)pthread_self(),max_squares,m*n);
     printf("THREAD %ld: Dead end boards:\n",(long)pthread_self());
     for(int i = 0; i < dead_end_pos; i++){
