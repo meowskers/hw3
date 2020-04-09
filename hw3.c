@@ -138,6 +138,7 @@ void* sonnys_place(void * input){
             printf("THREAD %ld: Sonny found a full knight's tour!\n",(long)pthread_self());
             free_board(board);
 			//pthread_exit(NULL);
+			free(valid_moves);
 			return NULL;
         }else{
             printf("THREAD %ld: Dead end after move #%d\n",(long)pthread_self(),move);
@@ -151,6 +152,7 @@ void* sonnys_place(void * input){
             } else{
                 free_board(board);
             }
+            free(valid_moves);
             //pthread_exit(NULL);
             return NULL;
         }
@@ -170,6 +172,7 @@ void* sonnys_place(void * input){
                 free(argss);
             }
         }
+        free(valid_moves);
         return NULL;
         //pthread_exit(NULL);
     }else{
@@ -209,9 +212,9 @@ void* sonnys_place(void * input){
                 //printf("$$%d$$%d\n",i,max_move);
             }
         }
+        
         in_args->move = max_move;
         free(tid);
-        free(argss);
         /*
         for(int i = 0; i < 8; i++){
             if((*valid_moves+i)!=-1){
@@ -228,9 +231,6 @@ void* sonnys_place(void * input){
         
         }
         */    
-        if(main_id!=pthread_self()){
-            //pthread_exit(NULL);
-        }
         }
     //free(valid_moves);
     return NULL;
