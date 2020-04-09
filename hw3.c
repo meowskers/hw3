@@ -211,6 +211,7 @@ void* sonnys_place(void * input){
         }
         in_args->move = max_move;
         free(tid);
+        free(argss);
         /*
         for(int i = 0; i < 8; i++){
             if((*valid_moves+i)!=-1){
