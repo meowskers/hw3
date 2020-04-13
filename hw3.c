@@ -13,15 +13,12 @@ int dead_end_pos = 0;
 pthread_t main_id;
 int sequence[8][2]= {{-2,-1},{-1,-2},{1,-2},{2,-1},{2,1},{1,2},{-1,2},{-2,1}};
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 struct thread_params{
     int c;
     int r; 
     int move; 
     char ** board;
-};
-struct return_val{
-    int val;
 };
 void free_board(char ** board){
     for(int i=0; i< m; i++){
@@ -48,12 +45,14 @@ char ** transpose(char ** board){
     return new_board;
 }
 void add_dead_end(char ** board){
+    pthread_mutex_lock(&lock);
     if(dead_end_pos==dead_end_size){
         dead_end_size = dead_end_size*2;
         dead_end_boards = (char ***)realloc(dead_end_boards, sizeof(char **)*dead_end_size);
     }
     dead_end_boards[dead_end_pos] = board;
     dead_end_pos = dead_end_pos + 1;
+    pthread_mutex_unlock(&lock);
 }
 void print_board(char ** board){
     for(int i=0; i < n; i++){
@@ -138,7 +137,7 @@ void* sonnys_place(void * input){
             printf("THREAD %ld: Sonny found a full knight's tour!\n",(long)pthread_self());
             free_board(board);
 			//pthread_exit(NULL);
-			free(valid_moves);
+			//free(valid_moves);
 			return NULL;
         }else{
             printf("THREAD %ld: Dead end after move #%d\n",(long)pthread_self(),move);
@@ -152,7 +151,7 @@ void* sonnys_place(void * input){
             } else{
                 free_board(board);
             }
-            free(valid_moves);
+            //free(valid_moves);
             //pthread_exit(NULL);
             return NULL;
         }
@@ -172,7 +171,7 @@ void* sonnys_place(void * input){
                 free(argss);
             }
         }
-        free(valid_moves);
+        //free(valid_moves);
         return NULL;
         //pthread_exit(NULL);
     }else{
@@ -309,6 +308,7 @@ int main(int argc, char** argv){
         free_board(dead_end_boards[i]);
     }
     free(dead_end_boards);
+    pthread_exit(NULL);
     return 0; 
     
 }
