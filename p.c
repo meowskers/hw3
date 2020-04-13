@@ -1,4 +1,4 @@
-void * q3( void * y ) 2{
+void * q3( void * y ) {
 int*x=(void*)y;
  char * s = calloc( *x + 16, sizeof( char ) );
 sprintf( s, "ABCDEFGH" );
