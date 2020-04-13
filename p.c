@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <string.h>
+
 void * q3( void * y ) {
 int*x=(void*)y;
  char * s = calloc( *x + 16, sizeof( char ) );
